@@ -1,0 +1,17 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "9500:9500"
+    volumes:
+      - paintcan_data:/data
+    environment:
+      DATA_DIR: /data
+  frontend:
+    build: ./frontend
+    ports:
+      - "4500:80"
+    depends_on:
+      - backend
+volumes:
+  paintcan_data:
