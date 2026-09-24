@@ -6,7 +6,7 @@ onMounted(async () => { items.value = (await getJSON('/api/history')).items })
 const totalOf = (h) => {
   try {
     const r = JSON.parse(h.result_json)
-    // prefer liters after touch-up fields were stripped on persist
+    // 写入即钉选：含补刷的记录取 total_liters（墙面+补刷），无补刷记录取 liters
     if (r.total_liters != null) return r.total_liters
     if (r.wall_liters != null && r.touch_up_liters != null) {
       return Number(r.wall_liters) + Number(r.touch_up_liters)
