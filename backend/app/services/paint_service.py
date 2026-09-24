@@ -29,22 +29,16 @@ class PaintService:
         result = estimate_room(r["length"], r["width"], r["height"], ops, cov, ct,
                                blocks, touch_up_mode, touch_up_coverage)
         payload = {"room_id": room_id, "coats": ct, "coverage": cov}
-        store = result
+        if blocks:
+            payload["touch_ups"] = blocks
+            payload["touch_up_mode"] = result["touch_up_mode"]
+            if result["touch_up_mode"] == "separate":
+                payload["touch_up_coverage"] = result["touch_up_coverage"]
+        # 持久化钉选：写入的就是本次试算回包的同一份结果，列表摘要与按号详情都取自它，
+        # 后续房间/补刷块改动不会重算或改写旧条
         if persist:
-            from app.services.patch_persist import shape_for_persist
-            store = shape_for_persist(result, cov, ct)
-            if blocks:
-                payload["touch_ups"] = blocks
-                payload["touch_up_mode"] = result.get("touch_up_mode")
-                if result.get("touch_up_mode") == "separate":
-                    payload["touch_up_coverage"] = result.get("touch_up_coverage")
-            rid = runs.insert(self._c, "estimate", payload, store, room_id)
+            rid = runs.insert(self._c, "estimate", payload, result, room_id)
         else:
-            if blocks:
-                payload["touch_ups"] = blocks
-                payload["touch_up_mode"] = result["touch_up_mode"]
-                if result["touch_up_mode"] == "separate":
-                    payload["touch_up_coverage"] = result["touch_up_coverage"]
             rid = None
         return {"run_id": rid, "room_id": room_id, **result}
     def dashboard(self):

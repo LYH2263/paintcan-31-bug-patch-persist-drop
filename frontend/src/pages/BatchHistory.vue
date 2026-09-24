@@ -6,7 +6,7 @@ onMounted(async () => { items.value = (await getJSON('/api/history')).items })
 const totalOf = (h) => {
   try {
     const r = JSON.parse(h.result_json)
-    // prefer liters after touch-up fields were stripped on persist
+    // 钉选结果：含补刷的记录以 total_liters 为准；无补刷的旧记录只有 liters
     if (r.total_liters != null) return r.total_liters
     if (r.wall_liters != null && r.touch_up_liters != null) {
       return Number(r.wall_liters) + Number(r.touch_up_liters)
